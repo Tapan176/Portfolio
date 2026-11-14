@@ -11,7 +11,7 @@ export const profile = {
   ],
   location: 'Ahmedabad, Gujarat, India',
   summary:
-    'Backend Engineer with 2+ years of experience building scalable distributed systems and cloud-native backend applications using Node.js, Golang, and Python. I work on microservices, event-driven architectures, real-time communication, intelligent retrieval pipelines and automation platforms, with a strong focus on system reliability, developer productivity and scalable platform engineering.',
+    'Backend Engineer with 3+ years of experience building scalable distributed systems and cloud-native backend applications using Node.js, Golang, and Python. Currently building Golang backend systems at Greeksoft Technology. I work on microservices, event-driven architectures, real-time communication, intelligent retrieval pipelines and automation platforms, with a strong focus on system reliability, developer productivity and scalable platform engineering.',
   links: {
     github: 'https://github.com/Tapan176',
     linkedin: 'https://www.linkedin.com/in/tapan-khokhariya-52b294205/',
@@ -31,7 +31,7 @@ export const resumes = [
 ]
 
 export const stats = [
-  { value: 2, suffix: '+', label: 'Years experience' },
+  { value: 3, suffix: '+', label: 'Years experience' },
   { value: 8, suffix: '', label: 'Backend platforms built' },
   { value: 8.94, suffix: '', label: 'CGPA / 10', decimals: 2 },
   { value: 3, suffix: '', label: 'Languages: Node · Go · Python' },
@@ -79,10 +79,21 @@ export const skillGroups = [
 
 export const experience = [
   {
+    // TODO(Tapan): add start date, location and real responsibilities for this role.
+    role: 'Software Developer · Golang',
+    company: 'Greeksoft Technology',
+    place: '',
+    period: 'Current role',
+    points: [
+      'Building and maintaining backend services in Golang.',
+    ],
+  },
+  {
     role: 'Software Developer',
     company: 'ZURU Tech India Pvt. Ltd.',
     place: 'Ahmedabad',
-    period: 'Aug 2023 – Present',
+    // TODO(Tapan): replace with the exact end month, e.g. 'Aug 2023 – Mar 2026'.
+    period: 'Joined Aug 2023',
     points: [
       'Develop and maintain scalable microservices in Node.js and Golang within a distributed system architecture.',
       'Design RESTful APIs and database schemas on PostgreSQL and MongoDB.',

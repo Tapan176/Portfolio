@@ -148,7 +148,8 @@ function Experience() {
                 <div>
                   <h3>{job.role}</h3>
                   <p className="company">
-                    {job.company} · {job.place}
+                    {job.company}
+                    {job.place ? ` · ${job.place}` : ''}
                   </p>
                 </div>
                 <span className="period">{job.period}</span>

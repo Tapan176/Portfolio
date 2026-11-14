@@ -1,10 +1,21 @@
-import { useMemo, useRef } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { Float, MeshDistortMaterial } from '@react-three/drei'
+import { Float, MeshDistortMaterial, PerformanceMonitor } from '@react-three/drei'
 import * as THREE from 'three'
-import { usePrefersReducedMotion } from '../hooks.js'
+import { useIsCoarsePointer, useIsSmallScreen, usePrefersReducedMotion } from '../hooks.js'
 
-const isSmall = () => typeof window !== 'undefined' && window.innerWidth < 760
+/**
+ * Which hero layout the screen needs (keep in sync with the CSS media queries):
+ *  - 'side'    : desktop / large tablet landscape - core sits beside the headline
+ *  - 'stacked' : phones & portrait tablets - core floats above the headline
+ *  - 'compact' : short landscape phones - small, dimmed core parked on the right
+ */
+function getLayout(width, height) {
+  const aspect = width / height
+  if (height < 560 && aspect > 1.3) return 'compact'
+  if (width < 900 || aspect < 1.1) return 'stacked'
+  return 'side'
+}
 
 /* ---------- Star field --------------------------------------------------- */
 function Stars({ count }) {
@@ -78,22 +89,34 @@ function Core({ scroll, reduced }) {
   useFrame((state, dt) => {
     const t = state.clock.elapsedTime
     const p = scroll.current
-    const small = state.size.width < 760
+    const layout = getLayout(state.size.width, state.size.height)
+    const vw = state.viewport.width // world units visible horizontally at the core's depth
+    const vh = state.viewport.height
     const speed = reduced ? 0.15 : 1
 
     // h = 1 in the hero, falls to 0 once the user scrolls into the content sections.
     const h = 1 - THREE.MathUtils.smoothstep(p, 0.02, 0.17)
     // Hero: big and beside the headline. Content: small, translucent, parked at the page edges.
-    const sideX = Math.cos(p * Math.PI * 5) * 7.5
-    const targetX = small ? 0 : THREE.MathUtils.lerp(sideX, 2.7, h)
-    const targetY = small ? THREE.MathUtils.lerp(4.2, 1.5, h) : THREE.MathUtils.lerp(Math.sin(p * Math.PI * 6) * 2.5, 0, h)
+    // Everything is expressed relative to the visible viewport, so it adapts to any aspect ratio.
+    const stacked = layout === 'stacked'
+    const heroX = stacked ? 0 : vw * (layout === 'compact' ? 0.3 : 0.2)
+    const heroY = stacked ? vh * 0.3 : 0
+    const parkX = stacked ? vw * 0.3 * Math.cos(p * Math.PI * 5) : vw * 0.42 * Math.cos(p * Math.PI * 5)
+    const parkY = stacked ? vh * 0.34 : Math.sin(p * Math.PI * 6) * vh * 0.28
+    const heroScale = stacked
+      ? THREE.MathUtils.clamp(vw * 0.17, 0.42, 0.85) * (state.size.height < 650 ? 0.7 : 1)
+      : layout === 'compact'
+        ? 0.5
+        : THREE.MathUtils.clamp(vw / 13, 0.75, 1.25)
+    const targetX = THREE.MathUtils.lerp(parkX, heroX, h)
+    const targetY = THREE.MathUtils.lerp(parkY, heroY, h)
     const targetZ = THREE.MathUtils.lerp(-5, 0, h)
-    const targetS = (small ? 0.62 : 1) * THREE.MathUtils.lerp(0.5, 1, h)
+    const targetS = heroScale * THREE.MathUtils.lerp(0.5, 1, h)
     group.current.position.x = THREE.MathUtils.damp(group.current.position.x, targetX, 3, dt)
     group.current.position.y = THREE.MathUtils.damp(group.current.position.y, targetY, 3, dt)
     group.current.position.z = THREE.MathUtils.damp(group.current.position.z, targetZ, 3, dt)
     group.current.scale.setScalar(THREE.MathUtils.damp(group.current.scale.x, targetS, 3, dt))
-    mat.current.opacity = THREE.MathUtils.lerp(0.42, 1, h)
+    mat.current.opacity = THREE.MathUtils.lerp(0.42, layout === 'compact' ? 0.65 : 1, h)
     wire.current.material.opacity = THREE.MathUtils.lerp(0.1, 0.22, h)
 
     knot.current.rotation.x = t * 0.18 * speed + p * 4
@@ -135,12 +158,44 @@ function Core({ scroll, reduced }) {
 }
 
 /* ---------- Floating geometric debris ------------------------------------ */
+// Each shape shrinks to nothing as it approaches the camera, so as the scene rotates with
+// scroll no shape can ever swing past the lens and cover the screen.
+function DebrisItem({ it, wire }) {
+  const mesh = useRef()
+  const world = useMemo(() => new THREE.Vector3(), [])
+  const color = useMemo(() => new THREE.Color().setHSL(it.hue, 0.8, 0.55), [it.hue])
+  const emissive = useMemo(() => new THREE.Color().setHSL(it.hue, 0.8, 0.35), [it.hue])
+  useFrame((state) => {
+    mesh.current.getWorldPosition(world)
+    const d = world.distanceTo(state.camera.position)
+    mesh.current.scale.setScalar(it.scale * THREE.MathUtils.smoothstep(d, 4, 8))
+  })
+  return (
+    <Float speed={it.speed} rotationIntensity={1.4} floatIntensity={1.6}>
+      <mesh ref={mesh} position={it.position} scale={it.scale}>
+        {it.kind === 0 && <octahedronGeometry args={[1, 0]} />}
+        {it.kind === 1 && <tetrahedronGeometry args={[1, 0]} />}
+        {it.kind === 2 && <icosahedronGeometry args={[1, 0]} />}
+        <meshStandardMaterial
+          color={color}
+          wireframe={wire}
+          roughness={0.3}
+          metalness={0.6}
+          emissive={emissive}
+          transparent
+          opacity={0.6}
+        />
+      </mesh>
+    </Float>
+  )
+}
+
 function Debris({ count }) {
   const items = useMemo(
     () =>
       Array.from({ length: count }, (_, i) => {
         const angle = (i / count) * Math.PI * 2
-        const radius = 8 + Math.random() * 6
+        const radius = 6 + Math.random() * 6
         return {
           position: [Math.cos(angle) * radius, (Math.random() - 0.5) * 11, Math.sin(angle) * radius - 7],
           scale: 0.2 + Math.random() * 0.4,
@@ -151,33 +206,18 @@ function Debris({ count }) {
       }),
     [count],
   )
-  return items.map((it, i) => (
-    <Float key={i} speed={it.speed} rotationIntensity={1.4} floatIntensity={1.6}>
-      <mesh position={it.position} scale={it.scale}>
-        {it.kind === 0 && <octahedronGeometry args={[1, 0]} />}
-        {it.kind === 1 && <tetrahedronGeometry args={[1, 0]} />}
-        {it.kind === 2 && <icosahedronGeometry args={[1, 0]} />}
-        <meshStandardMaterial
-          color={new THREE.Color().setHSL(it.hue, 0.8, 0.55)}
-          wireframe={i % 2 === 0}
-          roughness={0.3}
-          metalness={0.6}
-          emissive={new THREE.Color().setHSL(it.hue, 0.8, 0.35)}
-          transparent
-          opacity={0.6}
-        />
-      </mesh>
-    </Float>
-  ))
+  return items.map((it, i) => <DebrisItem key={i} it={it} wire={i % 2 === 0} />)
 }
 
 /* ---------- Camera rig: mouse parallax + scroll depth ---------------------- */
-function Rig({ scroll, reduced }) {
+function Rig({ scroll, reduced, coarse }) {
   const look = useMemo(() => new THREE.Vector3(), [])
   useFrame((state, dt) => {
     const p = scroll.current
-    const px = reduced ? 0 : state.pointer.x
-    const py = reduced ? 0 : state.pointer.y
+    const t = state.clock.elapsedTime
+    // Touch screens have no hover pointer, so use a gentle idle sway instead of mouse parallax.
+    const px = reduced ? 0 : coarse ? Math.sin(t * 0.25) * 0.5 : state.pointer.x
+    const py = reduced ? 0 : coarse ? Math.cos(t * 0.2) * 0.3 : state.pointer.y
     const targetZ = 9 - Math.sin(p * Math.PI) * 2.2
     state.camera.position.x = THREE.MathUtils.damp(state.camera.position.x, px * 0.9, 2.5, dt)
     state.camera.position.y = THREE.MathUtils.damp(state.camera.position.y, py * 0.6, 2.5, dt)
@@ -192,14 +232,24 @@ function Rig({ scroll, reduced }) {
 
 export default function Scene3D({ scroll }) {
   const reduced = usePrefersReducedMotion()
-  const small = isSmall()
+  const small = useIsSmallScreen()
+  const coarse = useIsCoarsePointer()
+  const maxDpr = small ? 1.5 : 1.75
+  const [dpr, setDpr] = useState(Math.min(maxDpr, typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1))
   return (
     <div className="scene-bg" aria-hidden="true">
       <Canvas
-        dpr={[1, small ? 1.4 : 1.75]}
+        dpr={dpr}
         camera={{ position: [0, 0, 9], fov: 50 }}
         gl={{ antialias: !small, alpha: true, powerPreference: 'high-performance' }}
+        // The canvas itself ignores the pointer, so listen on the page for parallax.
+        eventSource={document.documentElement}
+        eventPrefix="client"
       >
+        {/* Lowers resolution automatically on slow GPUs and restores it when they keep up. */}
+        <PerformanceMonitor
+          onChange={({ factor }) => setDpr(Math.max(1, Math.round((0.6 + 0.4 * factor) * maxDpr * 100) / 100))}
+        />
         <fog attach="fog" args={['#05060f', 12, 34]} />
         <ambientLight intensity={0.55} />
         <pointLight position={[6, 5, 6]} intensity={90} color="#22d3ee" />
@@ -208,7 +258,7 @@ export default function Scene3D({ scroll }) {
         <Stars count={small ? 900 : 2200} />
         <Core scroll={scroll} reduced={reduced} />
         <Debris count={small ? 8 : 16} />
-        <Rig scroll={scroll} reduced={reduced} />
+        <Rig scroll={scroll} reduced={reduced} coarse={coarse} />
       </Canvas>
     </div>
   )

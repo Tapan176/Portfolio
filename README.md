@@ -9,6 +9,16 @@ An animated 3D portfolio built with **React + Vite + three.js** (via `@react-thr
 - Respects `prefers-reduced-motion`; falls back to a plain gradient background when WebGL is unavailable
 - 100% static output, so it can be hosted free and runs 24x7 with no server
 
+## Responsive behaviour
+
+Tested (headless Edge) at 320x568, 360x740, 390x844, 844x390 (landscape phone), 768x1024, 1024x768, 1280x720, 1920x1080 and 2560x1440 with no horizontal overflow.
+
+- **Layout:** fluid grids that can shrink below their content, burger menu below 960px, single column below 880px, a dedicated short-landscape layout for phones turned sideways.
+- **Scaling:** root font size grows smoothly on 1080p/1440p/4K screens; the content container is rem-based so it scales with it.
+- **3D scene:** positions and sizes are computed from the visible viewport, so the hero scales with any aspect ratio. Phones/portrait screens get a lighter scene and a stacked layout; resolution drops automatically on slow GPUs; shapes shrink as they near the camera.
+- **Touch:** no hover-only effects or tilt, idle camera sway instead of mouse parallax, 44px tap targets, vertical swipes over the skill sphere still scroll the page.
+- **Other:** iPhone notch / safe-area insets, `prefers-reduced-motion`, print stylesheet, resume dropdown clamped to the viewport.
+
 ## Quick start
 
 ```bash

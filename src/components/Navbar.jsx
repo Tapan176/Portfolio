@@ -33,21 +33,38 @@ export default function Navbar() {
     return () => io.disconnect()
   }, [])
 
+  // Close the mobile menu on Escape, when resizing/rotating to a wide layout, or on outside tap.
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e) => e.key === 'Escape' && setOpen(false)
+    const onResize = () => window.innerWidth > 960 && setOpen(false)
+    const onPointer = (e) => !e.target.closest?.('.nav, .menu') && setOpen(false)
+    document.addEventListener('keydown', onKey)
+    window.addEventListener('resize', onResize)
+    document.addEventListener('pointerdown', onPointer)
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      window.removeEventListener('resize', onResize)
+      document.removeEventListener('pointerdown', onPointer)
+    }
+  }, [open])
+
   return (
-    <header className={`nav ${scrolled ? 'scrolled' : ''}`}>
+    <header className={`nav ${scrolled || open ? 'scrolled' : ''} ${open ? 'is-open' : ''}`}>
       <a href="#top" className="brand" aria-label="Back to top">
         <span className="logo">TK</span>
         <span className="brand-name">Tapan Khokhariya</span>
       </a>
       <button
         className="burger"
-        aria-label="Toggle menu"
+        aria-label={open ? 'Close menu' : 'Open menu'}
         aria-expanded={open}
+        aria-controls="primary-nav"
         onClick={() => setOpen((v) => !v)}
       >
         <span /><span /><span />
       </button>
-      <nav className={open ? 'open' : ''}>
+      <nav id="primary-nav" className={open ? 'open' : ''} aria-label="Primary">
         {links.map(([id, label]) => (
           <a
             key={id}

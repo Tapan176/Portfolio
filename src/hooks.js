@@ -14,6 +14,25 @@ export function usePrefersReducedMotion() {
   return reduced
 }
 
+/** Subscribe to a CSS media query. */
+export function useMediaQuery(query) {
+  const [matches, setMatches] = useState(() => typeof window !== 'undefined' && window.matchMedia(query).matches)
+  useEffect(() => {
+    const mq = window.matchMedia(query)
+    const onChange = () => setMatches(mq.matches)
+    onChange()
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [query])
+  return matches
+}
+
+/** Phones, small tablets and portrait screens (lighter 3D scene). */
+export const useIsSmallScreen = () => useMediaQuery('(max-width: 899px), (max-aspect-ratio: 11/10)')
+
+/** Touch-first devices (no hover pointer). */
+export const useIsCoarsePointer = () => useMediaQuery('(pointer: coarse)')
+
 /** Page scroll progress 0..1 stored in a ref (no re-renders, safe to read inside useFrame). */
 export function useScrollProgress() {
   const progress = useRef(0)

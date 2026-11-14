@@ -5,13 +5,14 @@ export const profile = {
   name: 'Tapan Khokhariya',
   roles: [
     'Backend Engineer',
+    'Golang Backends for Trading Apps',
     'Distributed Systems Builder',
     'Node.js · Golang · Python',
     'RAG & Real-time Systems',
   ],
   location: 'Ahmedabad, Gujarat, India',
   summary:
-    'Backend Engineer with 3+ years of experience building scalable distributed systems and cloud-native backend applications using Node.js, Golang, and Python. Currently building Golang backend systems at Greeksoft Technology. I work on microservices, event-driven architectures, real-time communication, intelligent retrieval pipelines and automation platforms, with a strong focus on system reliability, developer productivity and scalable platform engineering.',
+    'Backend Engineer with 3+ years of experience building scalable distributed systems and cloud-native backend applications using Node.js, Golang, and Python. Currently building Golang backend services for a stock trading platform at Greeksoft Technology. I work on microservices, event-driven architectures, real-time communication, intelligent retrieval pipelines and automation platforms, with a strong focus on system reliability, developer productivity and scalable platform engineering.',
   links: {
     github: 'https://github.com/Tapan176',
     linkedin: 'https://www.linkedin.com/in/tapan-khokhariya-52b294205/',
@@ -32,7 +33,7 @@ export const resumes = [
 
 export const stats = [
   { value: 3, suffix: '+', label: 'Years experience' },
-  { value: 8, suffix: '', label: 'Backend platforms built' },
+  { value: 10, suffix: '', label: 'Projects & platforms' }, // keep equal to projects.length
   { value: 8.94, suffix: '', label: 'CGPA / 10', decimals: 2 },
   { value: 3, suffix: '', label: 'Languages: Node · Go · Python' },
 ]
@@ -61,6 +62,7 @@ export const skills = [
   'RAG',
   'Flask',
   'React',
+  'Next.js',
   'Lambda',
   'EC2',
   'S3',
@@ -68,7 +70,7 @@ export const skills = [
 ]
 
 export const skillGroups = [
-  { title: 'Languages', items: ['Node.js', 'Golang', 'Python', 'JavaScript (ES6+)', 'SQL'] },
+  { title: 'Languages & Frameworks', items: ['Golang', 'Node.js', 'Python', 'JavaScript (ES6+)', 'Next.js', 'SQL'] },
   {
     title: 'Backend & Architecture',
     items: ['Express.js', 'RESTful APIs', 'Microservices', 'Event-Driven Architecture', 'Distributed Systems', 'WebSockets', 'Swagger'],
@@ -79,29 +81,29 @@ export const skillGroups = [
 
 export const experience = [
   {
-    // TODO(Tapan): add start date, location and real responsibilities for this role.
     role: 'Software Developer · Golang',
     company: 'Greeksoft Technology',
     place: '',
-    period: 'Current role',
+    period: 'Jun 2026 – Present',
     points: [
-      'Building and maintaining backend services in Golang.',
+      'Build and maintain the Golang backend systems behind a stock trading platform, including IPO, option chain, SIP, fundamentals and notification services, along with many other trading-app services.',
+      'Provide accurate market information and the features users expect from leading trading apps.',
+      'Work on a Next.js web application for the same stock platform; it runs on the same Golang backend that powers the trading app, so both clients share one set of services.',
     ],
   },
   {
     role: 'Software Developer',
     company: 'ZURU Tech India Pvt. Ltd.',
     place: 'Ahmedabad',
-    // TODO(Tapan): replace with the exact end month, e.g. 'Aug 2023 – Mar 2026'.
-    period: 'Joined Aug 2023',
+    period: 'Aug 2023 – Jun 2026',
     points: [
-      'Develop and maintain scalable microservices in Node.js and Golang within a distributed system architecture.',
-      'Design RESTful APIs and database schemas on PostgreSQL and MongoDB.',
+      'Developed and maintained scalable microservices in Node.js and Golang within a distributed system architecture.',
+      'Designed RESTful APIs and database schemas on PostgreSQL and MongoDB.',
       'Built centralized services for release management, version distribution, changelog publishing and automated update delivery.',
       'Built event-driven notification systems (in-app, email, SMS, Microsoft Teams, web push) on RabbitMQ and WebSockets.',
-      'Run real-time and asynchronous workflows with WebSockets, RabbitMQ and Redis.',
-      'Manage AWS Lambda, EC2, CloudWatch and S3 for deployment, monitoring and scheduled data sync.',
-      'Create GitLab CI/CD pipelines, Docker-based deployments, internal Node.js packages and cron automation; maintain Swagger docs for APIs and socket events.',
+      'Ran real-time and asynchronous workflows with WebSockets, RabbitMQ and Redis.',
+      'Managed AWS Lambda, EC2, CloudWatch and S3 for deployment, monitoring and scheduled data sync.',
+      'Created GitLab CI/CD pipelines, Docker-based deployments, internal Node.js packages and cron automation; maintained Swagger docs for APIs and socket events.',
     ],
   },
   {
@@ -128,6 +130,20 @@ export const experience = [
 ]
 
 export const projects = [
+  {
+    title: 'Trading Platform Backend Services',
+    blurb:
+      'Golang backend systems for a stock trading platform at Greeksoft: IPO, option chain, SIP, fundamentals, notifications and many other trading-app services, built to deliver accurate market information and the features users expect from leading trading apps.',
+    tags: ['Golang', 'Trading', 'Market Data', 'Microservices'],
+    accent: '#34d399',
+  },
+  {
+    title: 'Stock Platform Web App',
+    blurb:
+      'Next.js web application for the same stock platform. It consumes the same Golang backend as the trading app, so the web app and the trading app share one source of truth for market information and features.',
+    tags: ['Next.js', 'Golang APIs', 'Trading', 'Web'],
+    accent: '#22d3ee',
+  },
   {
     title: 'Multimodal RAG Platform',
     blurb:

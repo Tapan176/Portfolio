@@ -1,0 +1,10 @@
+services:
+  portfolio:
+    build: .
+    image: tapan-portfolio:latest
+    container_name: tapan-portfolio
+    ports:
+      - "8080:8080" # open http://localhost:8080
+    environment:
+      PORT: "8080"
+    restart: unless-stopped

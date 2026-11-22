@@ -9,6 +9,12 @@ An animated 3D portfolio built with **React + Vite + three.js** (via `@react-thr
 - Respects `prefers-reduced-motion`; falls back to a plain gradient background when WebGL is unavailable
 - 100% static output, so it can be hosted free and runs 24x7 with no server
 
+## Search & link previews
+
+`index.html` carries SEO meta tags, Open Graph / Twitter card tags (preview image: `public/og-image.png`) and `Person` structured data (JSON-LD). `public/sitemap.xml` and `public/robots.txt` list the site URL.
+
+**If the site URL changes (custom domain), update `https://tapan-portfolio-e5d5.onrender.com` in `index.html`, `public/sitemap.xml` and `public/robots.txt`.**
+
 ## Responsive behaviour
 
 Tested (headless Edge) at 320x568, 360x740, 390x844, 844x390 (landscape phone), 768x1024, 1024x768, 1280x720, 1920x1080 and 2560x1440 with no horizontal overflow.

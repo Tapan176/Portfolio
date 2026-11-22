@@ -1,4 +1,4 @@
-import { Component, lazy, Suspense, useMemo } from 'react'
+import { Component, lazy, Suspense, useMemo, useState } from 'react'
 import Navbar from './components/Navbar.jsx'
 import ResumeMenu from './components/ResumeMenu.jsx'
 import {
@@ -15,6 +15,8 @@ import {
   awards,
   education,
   experience,
+  highlights,
+  moreOnGithub,
   profile,
   projects,
   skillGroups,
@@ -55,8 +57,9 @@ function Hero() {
         </Reveal>
         <Reveal delay={240}>
           <p className="lead">
-            I design and build scalable distributed systems: microservices, event-driven
-            pipelines, real-time platforms and retrieval-augmented AI.
+            I build scalable Golang and Node.js backends - microservices, real-time and
+            event-driven systems - and currently power a stock-trading platform's market
+            data, IPO, option-chain and SIP services at Greeksoft.
           </p>
         </Reveal>
         <Reveal delay={320} className="cta">
@@ -86,6 +89,12 @@ function About() {
       <div className="about-grid">
         <Reveal className="glass about-text">
           <p>{profile.summary}</p>
+          <h3 className="mini-title">What I bring</h3>
+          <ul className="checklist">
+            {highlights.map((h) => (
+              <li key={h}>{h}</li>
+            ))}
+          </ul>
           <p className="muted">📍 {profile.location}</p>
         </Reveal>
         <div className="stats">
@@ -167,12 +176,47 @@ function Experience() {
   )
 }
 
+const FILTERS = [
+  ['all', 'All'],
+  ['backend', 'Backend'],
+  ['trading', 'Trading & Fintech'],
+  ['ai', 'AI & ML'],
+  ['web', 'Web'],
+]
+const INITIAL = 6
+
 function Projects() {
+  const [filter, setFilter] = useState('all')
+  const [expanded, setExpanded] = useState(false)
+  const filtered = useMemo(
+    () => (filter === 'all' ? projects : projects.filter((p) => p.cats.includes(filter))),
+    [filter],
+  )
+  const shown = expanded ? filtered : filtered.slice(0, INITIAL)
+  const hidden = filtered.length - shown.length
+
   return (
     <section id="projects" className="section">
       <SectionTitle kicker="04 · Projects" title="Things I've built" />
+      <div className="filters" role="group" aria-label="Filter projects by category">
+        {FILTERS.map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            className={`chip-btn ${filter === id ? 'on' : ''}`}
+            aria-pressed={filter === id}
+            onClick={() => {
+              setFilter(id)
+              setExpanded(false)
+            }}
+          >
+            {label}
+            <span className="count">{id === 'all' ? projects.length : projects.filter((p) => p.cats.includes(id)).length}</span>
+          </button>
+        ))}
+      </div>
       <div className="project-grid">
-        {projects.map((p, i) => (
+        {shown.map((p, i) => (
           <Reveal key={p.title} delay={(i % 3) * 90}>
             <TiltCard accent={p.accent} className="glass project">
               <span className="glow" />
@@ -184,10 +228,50 @@ function Projects() {
                   <li key={t}>{t}</li>
                 ))}
               </ul>
+              {p.links && (
+                <div className="proj-links">
+                  {p.links.live && (
+                    <a href={p.links.live} target="_blank" rel="noopener noreferrer">
+                      Live demo ↗
+                    </a>
+                  )}
+                  {p.links.github && (
+                    <a href={p.links.github} target="_blank" rel="noopener noreferrer">
+                      <GithubIcon /> Source
+                    </a>
+                  )}
+                </div>
+              )}
             </TiltCard>
           </Reveal>
         ))}
       </div>
+      {filtered.length > INITIAL && (
+        <div className="show-more">
+          <button type="button" className="btn btn-ghost" onClick={() => setExpanded((v) => !v)}>
+            {expanded ? 'Show fewer' : `Show ${hidden} more`}
+          </button>
+        </div>
+      )}
+
+      <Reveal className="glass more-gh">
+        <div>
+          <h3>More on GitHub</h3>
+          <ul>
+            {moreOnGithub.map((r) => (
+              <li key={r.url}>
+                <a href={r.url} target="_blank" rel="noopener noreferrer">
+                  {r.name} <span aria-hidden="true">↗</span>
+                </a>
+                <span className="muted"> - {r.desc}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <a className="btn btn-ghost" href={profile.links.github} target="_blank" rel="noopener noreferrer">
+          <GithubIcon /> All repositories
+        </a>
+      </Reveal>
     </section>
   )
 }

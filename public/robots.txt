@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://tapan-portfolio-e5d5.onrender.com/sitemap.xml
